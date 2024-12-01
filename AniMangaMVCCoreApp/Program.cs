@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using AniMangaMVCCoreApp.Data;
+using AniMangaMVCCoreApp.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,9 +16,46 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Set up authentication.
+// Add User to the ApplicationDbContext.
+builder.Services.AddIdentity<User, IdentityRole>(options => {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredLength = 12;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Add authentication scheme.
+builder.Services.AddAuthentication(options => {
+    options.DefaultAuthenticateScheme = 
+        options.DefaultChallengeScheme = 
+            options.DefaultForbidScheme = 
+                options.DefaultScheme = 
+                    options.DefaultSignInScheme =
+                        options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options => { // add JWT
+    options.TokenValidationParameters = new TokenValidationParameters {
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"], // Server
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:Audience"], // Client
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey( // Configure signing key
+            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
+        )
+    };
+});
+
+// Add repositories to scope.
 
 var app = builder.Build();
 
@@ -46,10 +86,8 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
-app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
