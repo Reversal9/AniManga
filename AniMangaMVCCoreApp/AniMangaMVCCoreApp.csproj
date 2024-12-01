@@ -93,8 +93,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-      <Folder Include="Dtos\" />
       <Folder Include="Interfaces\" />
       <Folder Include="Mappers\" />
       <Folder Include="Repositories\" />
