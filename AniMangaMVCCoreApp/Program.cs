@@ -25,25 +25,29 @@ builder.Services.AddSwaggerGen();
 
 // Set up authentication.
 // Add User to the ApplicationDbContext.
-builder.Services.AddIdentity<User, IdentityRole>(options => {
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireNonAlphanumeric = true;
-        options.Password.RequiredLength = 12;
-    })
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 12;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Add authentication scheme.
-builder.Services.AddAuthentication(options => {
-    options.DefaultAuthenticateScheme = 
-        options.DefaultChallengeScheme = 
-            options.DefaultForbidScheme = 
-                options.DefaultScheme = 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+        options.DefaultChallengeScheme =
+            options.DefaultForbidScheme =
+                options.DefaultScheme =
                     options.DefaultSignInScheme =
                         options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options => { // add JWT
-    options.TokenValidationParameters = new TokenValidationParameters {
+}).AddJwtBearer(options =>
+{ // add JWT
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
         ValidateIssuer = true,
         ValidIssuer = builder.Configuration["JWT:Issuer"], // Server
         ValidateAudience = true,

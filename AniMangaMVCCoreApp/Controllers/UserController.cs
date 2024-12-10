@@ -9,7 +9,7 @@ namespace AniMangaMVCCoreApp.Controllers;
 public class UserController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
-    
+
     public UserController(UserManager<User> userManager)
     {
         _userManager = userManager;
@@ -28,11 +28,11 @@ public class UserController : ControllerBase
                 UserName = userCreateRequestDto.UserName,
                 Email = userCreateRequestDto.Email
             };
-            
+
             var userResult = await _userManager.CreateAsync(user, userCreateRequestDto.Password);
 
             if (!userResult.Succeeded) return BadRequest(userResult.Errors);
-            
+
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
             if (roleResult.Succeeded) return Ok("User created");
 
